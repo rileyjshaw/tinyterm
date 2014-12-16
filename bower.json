@@ -1,0 +1,37 @@
+{
+  "name": "tinyterm",
+  "version": "0.1.0",
+  "description": "The tiniest in-browser terminal you've ever seen",
+  "repository": "https://github.com/rileyjshaw/tinyterm",
+  "homepage": "http://rileyjshaw.com/tinyterm",
+  "main": "dist/tinyterm.min.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "terminal",
+    "tiny",
+    "term",
+    "cli",
+    "emulator",
+    "command",
+    "cmd",
+    "retro",
+    "bash",
+    "shell"
+  ],
+  "author": "rileyjshaw <i@rileyjshaw.com>",
+  "license": "MIT",
+  "moduleType": [
+    "amd",
+    "globals",
+    "node"
+  ],
+  "ignore": [
+    "**/.!(jshintrc)",
+    "node_modules",
+    "bower_components",
+    "web",
+    "web_dist"
+  ]
+}
