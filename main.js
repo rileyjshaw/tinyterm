@@ -21,5 +21,6 @@ function init () {
     desc: 'Run arbitrary JS code.'
   });
 
+  window.console.log = term.print.bind(term);
   term.focus();
 }
