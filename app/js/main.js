@@ -30,7 +30,7 @@ function TinyTerm (parent) {
   input.type = 'text';
   input.name = 'prompt';
   input.autocomplete = input.autocorrect = input.autocapitalize = 'off';
-  input.spellcheck = 'false';
+  input.spellcheck = false;
 
   form.addEventListener('submit', this.run.bind(this));
 
@@ -234,22 +234,14 @@ TinyTerm.prototype.autocomplete = function (target) {
   return result;
 };
 
-TinyTerm.prototype.run = function (e, cb) {
-  var cmd, args, out;
+TinyTerm.prototype.done = function (out) {
+  this.print(out);
+  this.stopLoading();
+  this.realign();
+};
 
-  e = e || window.event;
-  if (e) e.preventDefault();
-
-  cmd = this.form.prompt.value;
-  this.form.reset();
-  this.startLoading();
-
-  this.print('> ' + cmd);
-  this.cmdHistory = [cmd].concat(this.cmdHistory).slice(0, 60);
-  this.cmdHistoryIndex = -1;
-  if (this.flashed) {
-    this.flashed = false;
-  }
+TinyTerm.prototype.process = function (cmd) {
+  var args, out;
 
   cmd = cmd.split(' ');
   args = cmd.splice(1).filter(function (arg) {
@@ -259,21 +251,34 @@ TinyTerm.prototype.run = function (e, cb) {
   cmd = cmd[0];
 
   if (this.commands[cmd]) {
-    out = this.commands[cmd].fn.apply(this, args);
-
-    // checks for null and undefined
-    if (out != null) {
-      this.print(out ? out : help(cmd, this));
-    }
+    this.done(this.commands[cmd].fn.apply(this, args));
   } else {
-    this.print(cmd + ': command not found');
+    this.done('Command not found: ' + cmd);
+  }
+};
+
+TinyTerm.prototype.run = function (e) {
+  var cmd;
+
+  e = e || window.event;
+  if (e) e.preventDefault();
+
+  cmd = this.form.prompt.value;
+  this.form.reset();
+  this.startLoading();
+
+  this.print('> ' + cmd);
+
+  this.cmdHistory = [cmd].concat(this.cmdHistory).slice(0, 60);
+  this.cmdHistoryIndex = -1;
+  if (this.flashed) {
+    this.flashed = false;
   }
 
-  this.stopLoading();
-  this.realign();
-
-  if (typeof cb === 'function') {
-    cb();
+  try {
+    this.process(cmd);
+  } catch (err) {
+    this.done(err.toString());
   }
 };
 
