@@ -1,6 +1,8 @@
 Tinyterm
 =====
 
+__This is still in super-alpha mode. It is a bit buggy, and it is very messy. You've been warned.__
+
 The tiniest in-browser terminal you've ever seen. Check it out [here](http://rileyjshaw.com/tinyterm).
 
 ## Installation
@@ -45,7 +47,7 @@ term.register('echo', {
 });
 ```
 
-The methods `autocomplete`, `flash`, `help`, `print`, `realign`, `run`, `startLoading`, and `stopLoading` are also exposed... you probably won't need to use them.
+The methods `autocomplete`, `done`, `flash`, `help`, `print`, `process`, `realign`, `run`, `startLoading`, and `stopLoading` are also exposed... you probably won't need to use them.
 
 ## Contributing
 Pull-requests to the `/app` directory are welcome. Please create an [issue](https://github.com/rileyjshaw/tinyterm/issues) if you plan on adding features, as it might be better suited to a plugin.
