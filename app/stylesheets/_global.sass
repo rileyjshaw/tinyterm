@@ -9,18 +9,15 @@
   margin: 0
   padding: 0.5em
   padding-top: 0
+  font-family: monospace
+  text-shadow: 0 0 0.1em $cfg + #111
+  color: $cfg
   background: $cbg
   background: radial-gradient($cbg + #080808, $cbg - #080808) 100% 100%
   box-shadow: 0 0 4px $cbg - #222 inset
   transition: background 0.06s
 
-  &, input
-    // http://meyerweb.com/eric/thoughts/2010/02/12/fixed-monospace-sizing/
-    font: 1em 'TinyTerm Monospace Fix', monospace
-    color: $cfg
-    text-shadow: 0 0 0.1em $cfg + #111
-
-  form, input, p
+  form, textarea, pre, code
     line-height: 1.5em
 
   &.flash
@@ -28,7 +25,6 @@
 
   form
     position: relative
-    box-sizing: border-box
     width: 100%
 
     &::before
@@ -36,20 +32,37 @@
       position: absolute
       left: 0
 
-  input
-    position: absolute
-    left: 0
+  .expander
+    position: relative
+
+  textarea, pre, code
+    word-wrap: break-word
+
+  textarea, pre
     width: 100%
-    box-sizing: border-box
+    margin: 0
     padding: 0
     border: 0
     outline: 0
+    white-space: pre-wrap
+
+  textarea
+    position: absolute
+    top: 0
+    left: 0
+    overflow: hidden
+    height: 100%
+    width: 100%
+    box-sizing: border-box
+    resize: none
     background: transparent
 
-  p
-    margin: 0
+  pre
+    visibility: hidden
 
-.tinytermWidthProbe
+  code
+    display: block
+
+.tinytermFontProbe
   position: absolute
   right: -100%
-  font-size: 20em

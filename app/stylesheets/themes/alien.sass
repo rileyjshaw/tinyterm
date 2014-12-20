@@ -1,2 +1,12 @@
 $cfg: #6697c7
 $cbg: #292a25
+
+// explicit element selector increases specificity
+div.tinyterm
+  color: $cfg
+  background: $cbg
+  background: radial-gradient($cbg + #080808, $cbg - #080808) 100% 100%
+  box-shadow: 0 0 4px $cbg - #222 inset
+
+  &.flash
+    background: $cbg + #888

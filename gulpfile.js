@@ -55,20 +55,21 @@ gulp.task('sassWeb', function () {
     .pipe(gulp.dest(paths.staticDir))
 });
 
-gulp.task('buildWeb', ['lint', 'scripts', 'sass', 'sassWeb'], function () {
+gulp.task('buildWeb', function () {
   return gulp.src(paths.webStatic)
     .pipe(gulp.dest(paths.webDist));
 });
 
 gulp.task('watch', function () {
-  gulp.watch([paths.scripts.all], ['lint', 'scripts']);
+  gulp.watch([paths.scripts.all], ['scripts']);
   gulp.watch([paths.stylesheets], ['sass']);
 });
 
 gulp.task('watchWeb', function () {
-  gulp.watch([paths.scripts.all], ['buildWeb']);
-  gulp.watch([paths.stylesheets], ['buildWeb']);
-  gulp.watch([paths.webStylesheets], ['buildWeb']);
+  gulp.watch([paths.scripts.all], ['scripts']);
+  gulp.watch([paths.stylesheets], ['sass']);
+  gulp.watch([paths.webStylesheets], ['sassWeb']);
+  gulp.watch([paths.webStatic], ['buildWeb']);
 });
 
 gulp.task('webserver', function () {
