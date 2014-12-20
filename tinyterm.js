@@ -1,6 +1,13 @@
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.TinyTerm=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var animation = require('./animation');
+var DOM = require('./dom');
+var history = require('./history');
+var run = require('./run');
+var shell = require('./shell');
+var util = require('./util');
+
 function TinyTerm (parent) {
-  var style, sheet, container, form, input, widthProbe, charWidth;
+  var domNodes;
 
   this.commands = {
     help: {
@@ -8,133 +15,51 @@ function TinyTerm (parent) {
       desc: 'Display helpful information about builtin commands.'
     }
   };
-  this.loadIndex = 0;
+
+  this.indices = {
+    loader: 0,
+    cmdHistory: -1
+  };
+
   this.loadInterval = null;
   this.cmdHistory = [];
-  this.cmdHistoryIndex = -1;
   this.keysDown = {};
   this.flashed = false;
   this.aliases = {};
 
-  // DOM stuff
-  style = document.createElement('style');
-  widthProbe = document.createElement('div');
-  container = this.container = document.createElement('div');
-  form = this.form = document.createElement('form');
-  input = this.input = document.createElement('input');
-
-  container.classList.add('tinyterm');
-
-  widthProbe.className = 'tinytermWidthProbe';
-  widthProbe.textContent = '>';
-
-  input.type = 'text';
-  input.name = 'prompt';
-  input.autocomplete = input.autocorrect = input.autocapitalize = 'off';
-  input.spellcheck = false;
-
-  form.addEventListener('submit', this.run.bind(this));
-
-  input.addEventListener('keydown', (function (e) {
-    var key;
-
-    e = e || window.event;
-    key = e.keyCode;
-
-    if (key === 9) { // tab
-      e.preventDefault();
-    }
-
-    if (!this.keysDown[key]) {
-      this.keysDown[key] = true;
-
-      if (key === 9) { // tab
-        this.autocomplete(this.input.value);
-      } else {
-        if (key === 38) { // up
-          this.cmdHistoryIndex = Math.min(
-            this.cmdHistoryIndex + 1,
-            this.cmdHistory.length - 1
-          );
-          input.value = this.cmdHistory[this.cmdHistoryIndex] || '';
-        } else if (key === 40) { // down
-          this.cmdHistoryIndex = Math.max(this.cmdHistoryIndex - 1, -1);
-          input.value = this.cmdHistory[this.cmdHistoryIndex] || '';
-        }
-
-        if (this.flashed) {
-          this.flashed = false;
-        }
-      }
-
-    }
-  }).bind(this), false);
-
-  input.addEventListener('keyup', (function (e) {
-    var key;
-
-    e = e || window.event;
-    key = e.keyCode;
-
-    this.keysDown[key] = false;
-  }).bind(this), false);
-
-  container.addEventListener('click', (function () {
-    this.focus();
-  }).bind(this), false);
-
-  container.appendChild(widthProbe);
-  container.appendChild(form);
-  form.appendChild(input);
-
-  if (typeof parent !== 'object' || container.nodeName !== 'DIV') {
-    parent = document.body;
-  }
-
-  parent.appendChild(container);
-
-  charWidth = widthProbe.offsetWidth / 20;
-  container.removeChild(widthProbe);
-
-  document.head.appendChild(style);
-
-  sheet = style.sheet;
-  sheet.insertRule('.tinyterm p, .tinyterm input {\
-    padding-left: ' + charWidth * 2 + 'px\
-  }', 0);
-  sheet.insertRule('.tinyterm p {\
-    text-indent: -' + charWidth * 2 + 'px\
-  }', 0);
-
+  domNodes = DOM.init(this, parent);
+  Object.keys(domNodes).forEach((function (key) {
+    this[key] = domNodes[key];
+  }).bind(this));
 }
 
+TinyTerm.prototype.startLoading = animation.startLoading;
+TinyTerm.prototype.stopLoading = animation.stopLoading;
+TinyTerm.prototype.flash = history.flash;
+TinyTerm.prototype.historyBack = history.back;
+TinyTerm.prototype.historyFwd = history.fwd;
+TinyTerm.prototype.focus = util.focus;
+TinyTerm.prototype.help = util.help;
+TinyTerm.prototype.print = util.print;
+TinyTerm.prototype.autocomplete = shell.autocomplete;
+TinyTerm.prototype.process = shell.process;
+TinyTerm.prototype.register = shell.register;
+TinyTerm.prototype.run = run;
+
+module.exports = TinyTerm;
+
+},{"./animation":2,"./dom":3,"./history":4,"./run":5,"./shell":6,"./util":7}],2:[function(require,module,exports){
 function loadAnimation (term) {
-  term.input.value = loadStates[term.loadIndex++];
-  term.loadIndex = term.loadIndex % 4;
+  term.input.value = loadStates[term.indices.loader++];
+  term.indices.loader = term.indices.loader % 4;
 }
 
-TinyTerm.prototype.help = function (cmd) {
-  cmd = this.commands[cmd];
-
-  if (cmd) {
-    return cmd.desc;
-  } else {
-    return Object.keys(this.commands).filter((function (key) {
-      return !this.aliases[key];
-    }).bind(this)).map((function (key) {
-      return key + ': ' + this.commands[key].desc;
-    }).bind(this));
-  }
-};
-
-var loadStates = ['/', '-', '\\', '|'];
-
-TinyTerm.prototype.startLoading = function () {
+function startLoading () {
   this.input.disabled = true;
   this.loadInterval = window.setInterval(loadAnimation.bind(null, this), 120);
-};
+}
 
-TinyTerm.prototype.stopLoading = function (disabled) {
+function stopLoading (disabled) {
   if (this.loadInterval) {
     window.clearInterval(this.loadInterval);
     this.loadInterval = null;
@@ -144,9 +69,168 @@ TinyTerm.prototype.stopLoading = function (disabled) {
       this.input.disabled = false;
     }
   }
+}
+
+var loadStates = ['/', '-', '\\', '|'];
+
+module.exports = {
+	startLoading: startLoading,
+	stopLoading: stopLoading
 };
 
-TinyTerm.prototype.flash = function (allowRepeat) {
+},{}],3:[function(require,module,exports){
+function clickHandler () {
+  if (window.getSelection().toString() === '') {
+    this.focus();
+  }
+}
+
+function inputHandler (e) {
+  this.mirrorInner.textContent = this.input.value;
+}
+
+function keyDownHandler (e) {
+  var key;
+
+  e = e || window.event;
+  key = e.keyCode;
+
+  if (key === 9) { // tab
+    e.preventDefault();
+
+    if (!this.keysDown[9]) {
+      this.autocomplete(this.input.value);
+      this.keysDown[9] = true;
+    }
+  } else if (key === 13 && !(this.keysDown[16] || this.keysDown[18])) {
+    submitHandler.call(this);
+  } else if (!this.keysDown[key]) {
+    this.keysDown[key] = true;
+
+    if (key === 38) { // up
+      this.historyBack();
+    } else if (key === 40) { // down
+      this.historyFwd();
+    }
+
+    if (this.flashed) {
+      this.flashed = false;
+    }
+  }
+}
+
+function keyUpHandler (e) {
+  var key;
+
+  e = e || window.event;
+  key = e.keyCode;
+
+  if (this.keysDown[key]) {
+    this.keysDown[key] = false;
+  }
+}
+
+function submitHandler (e) {
+  e = e || window.event;
+  if (e) {
+    e.preventDefault();
+  }
+
+  this.run();
+}
+
+function init (term, parent) {
+  var fontStyle, fontSize, fontFamily, color, charWidth;
+  var fontProbe = document.createElement('div');
+  var style = document.createElement('style');
+  var container = document.createElement('div');
+  var form = document.createElement('form');
+  var inputContainer = document.createElement('div');
+  var mirror = document.createElement('pre');
+  var mirrorInner = document.createElement('span');
+  var input = document.createElement('textarea');
+
+  container.classList.add('tinyterm');
+  inputContainer.classList.add('expander');
+
+  fontProbe.textContent = '>';
+  fontProbe.className = 'tinytermFontProbe';
+
+  input.name = 'prompt';
+  input.autocomplete = input.autocorrect = input.autocapitalize = 'off';
+  input.spellcheck = false;
+
+  mirror.appendChild(mirrorInner);
+  mirror.appendChild(document.createElement('br'));
+  inputContainer.appendChild(mirror);
+  inputContainer.appendChild(input);
+  form.appendChild(inputContainer);
+  container.appendChild(fontProbe);
+  container.appendChild(form);
+
+  if (typeof parent !== 'object' || container.nodeName !== 'DIV') {
+    parent = document.body;
+  }
+
+  parent.appendChild(container);
+
+  fontStyle = window.getComputedStyle(fontProbe);
+  fontSize = fontStyle.getPropertyValue('font-size');
+  fontFamily = fontStyle.getPropertyValue('font-family');
+  color = fontStyle.getPropertyValue('color');
+  fontProbe.style.fontSize = '20em';
+  charWidth = fontProbe.offsetWidth / 20;
+  container.removeChild(fontProbe);
+
+  document.head.appendChild(style);
+
+  sheet = style.sheet;
+  sheet.insertRule('.tinyterm code, .tinyterm pre, .tinyterm textarea {\
+    font-size: ' + fontSize + ';\
+    font-family: ' + fontFamily + ';\
+    color: ' + color + '\
+  }', 0);
+  sheet.insertRule('.tinyterm code, .tinyterm .expander {\
+    margin-left: ' + charWidth * 2 + 'px\
+  }', 0);
+  sheet.insertRule('.tinyterm code {\
+    text-indent: -' + charWidth * 2 + 'px\
+  }', 0);
+
+  container.addEventListener('click', clickHandler.bind(term));
+  input.addEventListener('keydown', keyDownHandler.bind(term));
+  input.addEventListener('keyup', keyUpHandler.bind(term));
+  input.addEventListener('input', inputHandler.bind(term));
+  form.addEventListener('submit', submitHandler.bind(term));
+
+  // added verbatim to TinyTerm object
+  return {
+    container: container,
+    form: form,
+    input: input,
+    mirrorInner: mirrorInner
+  };
+}
+
+module.exports = {
+  init: init
+};
+
+},{}],4:[function(require,module,exports){
+function back () {
+  this.indices.cmdHistory = Math.min(
+    this.indices.cmdHistory + 1,
+    this.cmdHistory.length - 1
+  );
+  this.input.value = this.cmdHistory[this.indices.cmdHistory] || '';
+}
+
+function fwd () {
+  this.indices.cmdHistory = Math.max(this.indices.cmdHistory - 1, -1);
+  this.input.value = this.cmdHistory[this.indices.cmdHistory] || '';
+}
+
+function flash (allowRepeat) {
   this.container.classList.add('flash');
 
   window.setTimeout((function () {
@@ -156,33 +240,43 @@ TinyTerm.prototype.flash = function (allowRepeat) {
   if (!allowRepeat) {
     this.flashed = true;
   }
+}
+
+module.exports = {
+  back: back,
+  fwd: fwd,
+  flash: flash
 };
 
-TinyTerm.prototype.focus = function () {
-  this.input.focus();
-};
+},{}],5:[function(require,module,exports){
+module.exports = function run () {
+  var cmd, out;
 
-TinyTerm.prototype.realign = function () {
-  this.container.scrollTop = this.container.scrollHeight;
-  this.focus();
-};
+  cmd = this.form.prompt.value;
+  this.form.reset();
+  this.mirrorInner.textContent = '';
+  this.startLoading();
 
-TinyTerm.prototype.print = function (str, tag) {
-  if (typeof tag !== 'string') {
-    tag = 'p';
+  this.print('>&nbsp;' + cmd);
+
+  this.cmdHistory = [cmd].concat(this.cmdHistory).slice(0, 60);
+  this.indices.cmdHistory = -1;
+  if (this.flashed) {
+    this.flashed = false;
   }
 
-  if (str) {
-    if (str.constructor === Array) {
-      str.forEach(this.print.bind(this));
-    } else {
-      this.form.insertAdjacentHTML('beforebegin', '<' + tag + '>' + str +
-        '</' + tag + '>');
-    }
+  try {
+    out = this.process(cmd);
+  } catch (err) {
+    out = err.toString();
   }
+
+  this.print(out);
+  this.stopLoading();
 };
 
-TinyTerm.prototype.autocomplete = function (target) {
+},{}],6:[function(require,module,exports){
+function autocomplete (target) {
   // naive
   function narrow (target, vals) {
     return vals.filter(function (val) {
@@ -231,17 +325,11 @@ TinyTerm.prototype.autocomplete = function (target) {
     }
   }
 
-  this.realign();
   return result;
-};
+}
 
-TinyTerm.prototype.done = function (out) {
-  this.print(out);
-  this.stopLoading();
-  this.realign();
-};
-
-TinyTerm.prototype.process = function (cmd) {
+// anything called asynchronously from process() runs in the bg
+function process (cmd) {
   var args, out;
 
   cmd = cmd.split(' ');
@@ -256,34 +344,9 @@ TinyTerm.prototype.process = function (cmd) {
   } else {
     this.done('Command not found: ' + cmd);
   }
-};
+}
 
-TinyTerm.prototype.run = function (e) {
-  var cmd;
-
-  e = e || window.event;
-  if (e) e.preventDefault();
-
-  cmd = this.form.prompt.value;
-  this.form.reset();
-  this.startLoading();
-
-  this.print('> ' + cmd);
-
-  this.cmdHistory = [cmd].concat(this.cmdHistory).slice(0, 60);
-  this.cmdHistoryIndex = -1;
-  if (this.flashed) {
-    this.flashed = false;
-  }
-
-  try {
-    this.process(cmd);
-  } catch (err) {
-    this.done(err.toString());
-  }
-};
-
-TinyTerm.prototype.register = function (name, args) {
+function register (name, args) {
   var fn, desc, aliases, command;
 
   if (typeof name !== 'string') {
@@ -315,9 +378,55 @@ TinyTerm.prototype.register = function (name, args) {
       this.aliases[alias] = true;
     }).bind(this));
   }
+}
+
+module.exports = {
+  autocomplete: autocomplete,
+  process: process,
+  register: register
 };
 
-module.exports = TinyTerm;
+},{}],7:[function(require,module,exports){
+function focus () {
+  this.input.focus();
+}
+
+function help (cmd) {
+  cmd = this.commands[cmd];
+
+  if (cmd) {
+    return cmd.desc;
+  } else {
+    return Object.keys(this.commands).filter((function (key) {
+      return !this.aliases[key];
+    }).bind(this)).map((function (key) {
+      return key + ': ' + this.commands[key].desc;
+    }).bind(this));
+  }
+}
+
+function print (str, tag) {
+  if (typeof tag !== 'string') {
+    tag = 'code';
+  }
+
+  if (str) {
+    if (str.constructor === Array) {
+      str.forEach(this.print.bind(this));
+    } else {
+      this.form.insertAdjacentHTML('beforebegin', '<' + tag + '>' + str +
+        '</' + tag + '>');
+    }
+  }
+
+  this.container.scrollTop = this.container.scrollHeight;
+  this.focus();
+}
+
+module.exports = {
+  focus: focus,
+  print: print
+};
 
 },{}]},{},[1])(1)
 });

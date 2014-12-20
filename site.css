@@ -11,7 +11,6 @@ body {
   left: 50%;
   height: 300px;
   width: 400px;
-  font-size: 12px;
   background: #e2ded5;
   -webkit-transform: translate(-50%, -50%);
       -ms-transform: translate(-50%, -50%);
@@ -32,14 +31,13 @@ body {
     background: #e2ded5; }
 
 .tinyterm {
-  top: 10%;
-  left: 10%;
-  height: 80%;
-  width: 80%;
+  top: 5%;
+  left: 14%;
+  height: 90%;
+  width: 72%;
   overflow: hidden;
+  font: 12px "Press Start 2P", monospace;
   box-shadow: none; }
-  .tinyterm, .tinyterm input {
-    font-family: "Press Start 2P", monospace; }
   .tinyterm::after {
     content: "!";
     position: absolute;
@@ -57,6 +55,6 @@ body {
         -ms-transform: translate(-50%, -50%);
             transform: translate(-50%, -50%); }
   .tinyterm.flash {
-    background: initial; }
+    background: none; }
     .tinyterm.flash::after {
       display: block; }

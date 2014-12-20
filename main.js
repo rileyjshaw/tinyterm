@@ -1,26 +1,20 @@
-WebFont.load({
-  google: { families: ['Press Start 2P'] },
-  active: init
-});
+!function () {
+  function init () {
+    var term = new TinyTerm(document.querySelector('.container'));
 
-function init () {
-  var term = new TinyTerm(document.querySelector('.container'));
+    term.process = eval;
 
-  term.register('echo', {
-    fn: function () {
-      return Array.prototype.slice.call(arguments).join(' ');
-    },
-    desc: 'Write arguments to the standard output.'
-  });
+    window.console.log = term.print.bind(term);
+    term.print('&nbsp;');
+    term.focus();
+  }
 
-  term.register('js', {
-    fn: function () {
-      var args = Array.prototype.slice.call(arguments).join(' ');
-      return eval(args);
-    },
-    desc: 'Run arbitrary JS code.'
-  });
-
-  window.console.log = term.print.bind(term);
-  term.focus();
-}
+  if (typeof WebFont === 'object') {
+    WebFont.load({
+      google: { families: ['Press Start 2P'] },
+      active: init
+    });
+  } else {
+    init();
+  }
+}();
