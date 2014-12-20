@@ -13,6 +13,7 @@ var paths = {
   },
   staticDir: './web/static',
   stylesheets: './app/stylesheets/**/*.sass',
+  webCache: './.web_cache',
   webDist: './web_dist',
   webStatic: './web/static/**/*',
   webStylesheets: './web/stylesheets/**/*.sass'
@@ -85,5 +86,5 @@ gulp.task( 'default', [ 'lint', 'scripts', 'watch' ] );
 gulp.task( 'web', [ 'sass', 'buildWeb', 'webserver', 'watchWeb' ] );
 gulp.task('deploy', ['buildWeb'], function () {
   gulp.src(paths.webDist + '/**/*')
-    .pipe($.ghPages('https://github.com/rileyjshaw/tinyterm.git', 'origin'));
+    .pipe($.ghPages({ cacheDir: paths.webCache }));
 });
