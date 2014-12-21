@@ -1,4 +1,4 @@
-module.exports = function run () {
+module.exports = function run (cb) {
   var cmd, out;
 
   cmd = this.form.prompt.value;
@@ -18,8 +18,14 @@ module.exports = function run () {
     out = this.process(cmd);
   } catch (err) {
     out = err.toString();
-  }
+    // propagate the error
+    throw err;
+  } finally {
+    this.stopLoading();
+    this.print(out);
 
-  this.print(out);
-  this.stopLoading();
+    if (typeof cb === 'function') {
+      cb();
+    }
+  }
 };

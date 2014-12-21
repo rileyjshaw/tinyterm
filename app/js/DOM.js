@@ -59,7 +59,7 @@ function submitHandler (e) {
 }
 
 function init (term, parent) {
-  var fontStyle, fontSize, fontFamily, color, charWidth;
+  var fontStyle, fontSize, fontFamily, color, textShadow, charWidth;
   var fontProbe = document.createElement('div');
   var style = document.createElement('style');
   var container = document.createElement('div');
@@ -97,6 +97,7 @@ function init (term, parent) {
   fontSize = fontStyle.getPropertyValue('font-size');
   fontFamily = fontStyle.getPropertyValue('font-family');
   color = fontStyle.getPropertyValue('color');
+  textShadow = fontStyle.getPropertyValue('text-shadow');
   fontProbe.style.fontSize = '20em';
   charWidth = fontProbe.offsetWidth / 20;
   container.removeChild(fontProbe);
@@ -107,7 +108,8 @@ function init (term, parent) {
   sheet.insertRule('.tinyterm code, .tinyterm pre, .tinyterm textarea {\
     font-size: ' + fontSize + ';\
     font-family: ' + fontFamily + ';\
-    color: ' + color + '\
+    color: ' + color + ';\
+    text-shadow: ' + textShadow + '\
   }', 0);
   sheet.insertRule('.tinyterm code, .tinyterm .expander {\
     margin-left: ' + charWidth * 2 + 'px\

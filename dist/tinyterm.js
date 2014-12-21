@@ -11,8 +11,8 @@ function TinyTerm (parent) {
 
   this.commands = {
     help: {
-      fn: this.help,
-      desc: 'Display helpful information about builtin commands.'
+      fn: util.help,
+      desc: 'Display helpful information about builtin commands.',
     }
   };
 
@@ -25,7 +25,11 @@ function TinyTerm (parent) {
   this.cmdHistory = [];
   this.keysDown = {};
   this.flashed = false;
-  this.aliases = {};
+
+  this.commands.man = this.commands.help;
+  this.aliases = {
+    'man': true
+  };
 
   domNodes = DOM.init(this, parent);
   Object.keys(domNodes).forEach((function (key) {
@@ -140,7 +144,7 @@ function submitHandler (e) {
 }
 
 function init (term, parent) {
-  var fontStyle, fontSize, fontFamily, color, charWidth;
+  var fontStyle, fontSize, fontFamily, color, textShadow, charWidth;
   var fontProbe = document.createElement('div');
   var style = document.createElement('style');
   var container = document.createElement('div');
@@ -178,6 +182,7 @@ function init (term, parent) {
   fontSize = fontStyle.getPropertyValue('font-size');
   fontFamily = fontStyle.getPropertyValue('font-family');
   color = fontStyle.getPropertyValue('color');
+  textShadow = fontStyle.getPropertyValue('text-shadow');
   fontProbe.style.fontSize = '20em';
   charWidth = fontProbe.offsetWidth / 20;
   container.removeChild(fontProbe);
@@ -188,7 +193,8 @@ function init (term, parent) {
   sheet.insertRule('.tinyterm code, .tinyterm pre, .tinyterm textarea {\
     font-size: ' + fontSize + ';\
     font-family: ' + fontFamily + ';\
-    color: ' + color + '\
+    color: ' + color + ';\
+    text-shadow: ' + textShadow + '\
   }', 0);
   sheet.insertRule('.tinyterm code, .tinyterm .expander {\
     margin-left: ' + charWidth * 2 + 'px\
@@ -249,7 +255,7 @@ module.exports = {
 };
 
 },{}],5:[function(require,module,exports){
-module.exports = function run () {
+module.exports = function run (cb) {
   var cmd, out;
 
   cmd = this.form.prompt.value;
@@ -269,10 +275,16 @@ module.exports = function run () {
     out = this.process(cmd);
   } catch (err) {
     out = err.toString();
-  }
+    // propagate the error
+    throw err;
+  } finally {
+    this.stopLoading();
+    this.print(out);
 
-  this.print(out);
-  this.stopLoading();
+    if (typeof cb === 'function') {
+      cb();
+    }
+  }
 };
 
 },{}],6:[function(require,module,exports){
@@ -340,37 +352,42 @@ function process (cmd) {
   cmd = cmd[0];
 
   if (this.commands[cmd]) {
-    this.done(this.commands[cmd].fn.apply(this, args));
+    return this.commands[cmd].fn.apply(this, args);
   } else {
-    this.done('Command not found: ' + cmd);
+    return 'Command not found: ' + cmd;
   }
 }
 
-function register (name, args) {
-  var fn, desc, aliases, command;
+function register (name, command) {
+  var fn, desc, aliases, args;
 
   if (typeof name !== 'string') {
     throw 'Must provide a name string to the TinyTerm constructor';
   }
-  if (typeof args !== 'object') {
-    throw 'Must provide an args object to the TinyTerm constructor';
+  if (typeof command !== 'object') {
+    throw 'Must provide a command object to the TinyTerm constructor';
   }
 
-  fn = args.fn;
-  desc = args.desc;
-  aliases = args.aliases;
+  fn = command.fn;
+  desc = command.desc;
+  aliases = command.aliases;
+  args = command.args;
 
   if (typeof fn !== 'function') {
-    throw 'args object requires a function "fn" in the TinyTerm constructor';
+    throw 'command object requires a function "fn" in the TinyTerm constructor';
   }
   if (typeof desc !== 'string') {
-    throw 'args object requires a string "desc" in the TinyTerm constructor';
+    throw 'command object requires a string "desc" in the TinyTerm constructor';
   }
 
   this.commands[name] = command = {
     fn: fn,
     desc: desc
   };
+
+  if (args && args.constructor === Array) {
+    this.commands[name].args = args;
+  }
 
   if (aliases && aliases.constructor === Array) {
     aliases.forEach((function (alias) {
@@ -387,10 +404,6 @@ module.exports = {
 };
 
 },{}],7:[function(require,module,exports){
-function focus () {
-  this.input.focus();
-}
-
 function help (cmd) {
   cmd = this.commands[cmd];
 
@@ -403,6 +416,10 @@ function help (cmd) {
       return key + ': ' + this.commands[key].desc;
     }).bind(this));
   }
+}
+
+function focus () {
+  this.input.focus();
 }
 
 function print (str, tag) {
@@ -424,6 +441,7 @@ function print (str, tag) {
 }
 
 module.exports = {
+  help: help,
   focus: focus,
   print: print
 };

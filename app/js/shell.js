@@ -62,37 +62,42 @@ function process (cmd) {
   cmd = cmd[0];
 
   if (this.commands[cmd]) {
-    this.done(this.commands[cmd].fn.apply(this, args));
+    return this.commands[cmd].fn.apply(this, args);
   } else {
-    this.done('Command not found: ' + cmd);
+    return 'Command not found: ' + cmd;
   }
 }
 
-function register (name, args) {
-  var fn, desc, aliases, command;
+function register (name, command) {
+  var fn, desc, aliases, args;
 
   if (typeof name !== 'string') {
     throw 'Must provide a name string to the TinyTerm constructor';
   }
-  if (typeof args !== 'object') {
-    throw 'Must provide an args object to the TinyTerm constructor';
+  if (typeof command !== 'object') {
+    throw 'Must provide a command object to the TinyTerm constructor';
   }
 
-  fn = args.fn;
-  desc = args.desc;
-  aliases = args.aliases;
+  fn = command.fn;
+  desc = command.desc;
+  aliases = command.aliases;
+  args = command.args;
 
   if (typeof fn !== 'function') {
-    throw 'args object requires a function "fn" in the TinyTerm constructor';
+    throw 'command object requires a function "fn" in the TinyTerm constructor';
   }
   if (typeof desc !== 'string') {
-    throw 'args object requires a string "desc" in the TinyTerm constructor';
+    throw 'command object requires a string "desc" in the TinyTerm constructor';
   }
 
   this.commands[name] = command = {
     fn: fn,
     desc: desc
   };
+
+  if (args && args.constructor === Array) {
+    this.commands[name].args = args;
+  }
 
   if (aliases && aliases.constructor === Array) {
     aliases.forEach((function (alias) {

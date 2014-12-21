@@ -1,7 +1,3 @@
-function focus () {
-  this.input.focus();
-}
-
 function help (cmd) {
   cmd = this.commands[cmd];
 
@@ -14,6 +10,10 @@ function help (cmd) {
       return key + ': ' + this.commands[key].desc;
     }).bind(this));
   }
+}
+
+function focus () {
+  this.input.focus();
 }
 
 function print (str, tag) {
@@ -35,6 +35,7 @@ function print (str, tag) {
 }
 
 module.exports = {
+  help: help,
   focus: focus,
   print: print
 };

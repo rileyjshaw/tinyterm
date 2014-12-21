@@ -10,8 +10,8 @@ function TinyTerm (parent) {
 
   this.commands = {
     help: {
-      fn: this.help,
-      desc: 'Display helpful information about builtin commands.'
+      fn: util.help,
+      desc: 'Display helpful information about builtin commands.',
     }
   };
 
@@ -24,7 +24,11 @@ function TinyTerm (parent) {
   this.cmdHistory = [];
   this.keysDown = {};
   this.flashed = false;
-  this.aliases = {};
+
+  this.commands.man = this.commands.help;
+  this.aliases = {
+    'man': true
+  };
 
   domNodes = DOM.init(this, parent);
   Object.keys(domNodes).forEach((function (key) {
