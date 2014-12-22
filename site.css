@@ -36,7 +36,7 @@ body {
   height: 90%;
   width: 72%;
   overflow: hidden;
-  font: 12px "Press Start 2P", monospace;
+  font: 18px "VT323", monospace;
   box-shadow: none; }
   .tinyterm::after {
     content: "!";
@@ -54,6 +54,8 @@ body {
     -webkit-transform: translate(-50%, -50%);
         -ms-transform: translate(-50%, -50%);
             transform: translate(-50%, -50%); }
+  .tinyterm a {
+    color: #ff0; }
   .tinyterm.flash {
     background: none; }
     .tinyterm.flash::after {
