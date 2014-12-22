@@ -107,6 +107,7 @@ function keyDownHandler (e) {
       this.keysDown[9] = true;
     }
   } else if (key === 13 && !(this.keysDown[16] || this.keysDown[18])) {
+    e.preventDefault();
     submitHandler.call(this);
   } else if (!this.keysDown[key]) {
     this.keysDown[key] = true;
@@ -224,16 +225,28 @@ module.exports = {
 
 },{}],4:[function(require,module,exports){
 function back () {
-  this.indices.cmdHistory = Math.min(
-    this.indices.cmdHistory + 1,
-    this.cmdHistory.length - 1
-  );
-  this.input.value = this.cmdHistory[this.indices.cmdHistory] || '';
+  var newIndex = this.indices.cmdHistory + 1;
+  var historyLength = this.cmdHistory.length - 1;
+
+  if (newIndex > historyLength) {
+    newIndex = historyLength;
+    this.flash(true);
+  }
+
+  this.indices.cmdHistory = newIndex;
+  this.input.value = this.cmdHistory[newIndex] || '';
 }
 
 function fwd () {
-  this.indices.cmdHistory = Math.max(this.indices.cmdHistory - 1, -1);
-  this.input.value = this.cmdHistory[this.indices.cmdHistory] || '';
+  var newIndex = this.indices.cmdHistory - 1;
+
+  if (newIndex < 0) {
+    newIndex = -1;
+    this.flash(true);
+  }
+
+  this.indices.cmdHistory = newIndex;
+  this.input.value = this.cmdHistory[newIndex] || '';
 }
 
 function flash (allowRepeat) {
@@ -259,8 +272,6 @@ module.exports = function run (cb) {
   var cmd, out;
 
   cmd = this.form.prompt.value;
-  this.form.reset();
-  this.mirrorInner.textContent = '';
   this.startLoading();
 
   this.print('>&nbsp;' + cmd);
@@ -279,6 +290,8 @@ module.exports = function run (cb) {
     throw err;
   } finally {
     this.stopLoading();
+    this.form.reset();
+    this.mirrorInner.textContent = '';
     this.print(out);
 
     if (typeof cb === 'function') {
@@ -427,7 +440,8 @@ function print (str, tag) {
     tag = 'code';
   }
 
-  if (str) {
+  // checks for null and undefined
+  if (str != null) {
     if (str.constructor === Array) {
       str.forEach(this.print.bind(this));
     } else {

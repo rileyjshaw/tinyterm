@@ -21,7 +21,8 @@ function print (str, tag) {
     tag = 'code';
   }
 
-  if (str) {
+  // checks for null and undefined
+  if (str != null) {
     if (str.constructor === Array) {
       str.forEach(this.print.bind(this));
     } else {

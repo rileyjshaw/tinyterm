@@ -22,6 +22,7 @@ function keyDownHandler (e) {
       this.keysDown[9] = true;
     }
   } else if (key === 13 && !(this.keysDown[16] || this.keysDown[18])) {
+    e.preventDefault();
     submitHandler.call(this);
   } else if (!this.keysDown[key]) {
     this.keysDown[key] = true;

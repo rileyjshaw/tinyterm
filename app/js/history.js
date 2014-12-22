@@ -1,14 +1,26 @@
 function back () {
-  this.indices.cmdHistory = Math.min(
-    this.indices.cmdHistory + 1,
-    this.cmdHistory.length - 1
-  );
-  this.input.value = this.cmdHistory[this.indices.cmdHistory] || '';
+  var newIndex = this.indices.cmdHistory + 1;
+  var historyLength = this.cmdHistory.length - 1;
+
+  if (newIndex > historyLength) {
+    newIndex = historyLength;
+    this.flash(true);
+  }
+
+  this.indices.cmdHistory = newIndex;
+  this.input.value = this.cmdHistory[newIndex] || '';
 }
 
 function fwd () {
-  this.indices.cmdHistory = Math.max(this.indices.cmdHistory - 1, -1);
-  this.input.value = this.cmdHistory[this.indices.cmdHistory] || '';
+  var newIndex = this.indices.cmdHistory - 1;
+
+  if (newIndex < 0) {
+    newIndex = -1;
+    this.flash(true);
+  }
+
+  this.indices.cmdHistory = newIndex;
+  this.input.value = this.cmdHistory[newIndex] || '';
 }
 
 function flash (allowRepeat) {

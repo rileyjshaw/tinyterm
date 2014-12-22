@@ -2,8 +2,6 @@ module.exports = function run (cb) {
   var cmd, out;
 
   cmd = this.form.prompt.value;
-  this.form.reset();
-  this.mirrorInner.textContent = '';
   this.startLoading();
 
   this.print('>&nbsp;' + cmd);
@@ -22,6 +20,8 @@ module.exports = function run (cb) {
     throw err;
   } finally {
     this.stopLoading();
+    this.form.reset();
+    this.mirrorInner.textContent = '';
     this.print(out);
 
     if (typeof cb === 'function') {
