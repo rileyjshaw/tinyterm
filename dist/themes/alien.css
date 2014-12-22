@@ -1,4 +1,5 @@
 div.tinyterm {
+  text-shadow: 0 0 0.1em #5687b7;
   color: #6697c7;
   background: #292a25;
   background: -webkit-radial-gradient(#31322d, #21221d) 100% 100%;

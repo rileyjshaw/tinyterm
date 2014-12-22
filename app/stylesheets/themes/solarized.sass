@@ -1,0 +1,12 @@
+$cfg: #b58900
+$cbg: #fdf6e3
+
+// explicit element selector increases specificity
+div.tinyterm
+  text-shadow: none
+  color: $cfg
+  background: $cbg
+  box-shadow: none
+
+  &.flash
+    background: $cbg + #888
