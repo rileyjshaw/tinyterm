@@ -1,12 +1,10 @@
 Tinyterm
 =====
 
-__This is still in super-alpha mode. It is a bit buggy, and it is very messy. You've been warned.__
-
 The tiniest in-browser terminal you've ever seen. Check it out [here](http://rileyjshaw.com/tinyterm).
 
 ## Installation
-tinyterm can be installed using [npm](https://www.npmjs.org/package/tinyterm), [bower](http://bower.io/), or included from [jsdelivr](http://cdn.jsdelivr.net/tinyterm/latest/mainfile):
+tinyterm can be installed using [npm](https://www.npmjs.org/package/tinyterm), [bower](http://bower.io/), or included from [jsdelivr](http://www.jsdelivr.com/#!tinyterm):
 ```bash
 npm install tinyterm
 ```
@@ -14,6 +12,8 @@ npm install tinyterm
 bower install tinyterm
 ```
 ```html
+<link rel="stylesheet" href="//cdn.jsdelivr.net/tinyterm/latest/tinyterm.min.css">
+<!-- ... -->
 <script src="//cdn.jsdelivr.net/tinyterm/latest/mainfile"></script>
 ```
 
@@ -50,7 +50,7 @@ term.register('echo', {
 The methods `autocomplete`, `done`, `flash`, `help`, `print`, `process`, `realign`, `run`, `startLoading`, and `stopLoading` are also exposed... you probably won't need to use them.
 
 ## Contributing
-Pull-requests to the `/app` directory are welcome. Please create an [issue](https://github.com/rileyjshaw/tinyterm/issues) if you plan on adding features, as it might be better suited to a plugin.
+Pull-requests to the `/app` directory are welcome. Please create an [issue](https://github.com/rileyjshaw/tinyterm/issues) if you plan on adding features, as it might be better suited as a plugin.
 
 Please squash changes down to a single commit before making a pull-request.
 
@@ -85,9 +85,10 @@ Pull requests _must_ adhere to the following code style guidelines, influenced h
  - If statements have to be broken across lines, end lines with an operator:
 ```javascript
 // example
-var reallyReallyReallyLongLine = 'Zero Cool' + ', Acid Burn' + ', Lord Nikon' +
-    	', The Phantom Phreak' + ', Cereal Killer' + ', The Plague' +
-    	', that other kid...';
+var reallyLongVariableName = [1, 2, 3];
+reallyLongVariableName = reallyLongVariableName.length > 4 ?
+  reallyLongVariableName.slice(-4) :
+  reallyLongVariableName;
 ```
  - Gulp will automatically lint everything through jshint. Don't make it complain.
 
