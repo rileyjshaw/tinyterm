@@ -16,8 +16,14 @@ div.tinyterm {
   color: #14fdce;
   background: #031e11;
   box-shadow: inset 0 0 18em black;
+  -webkit-transition: none;
+          transition: none;
   -webkit-animation: crt-output 10ms infinite;
           animation: crt-output 10ms infinite; }
+  div.tinyterm.flash {
+    background: #14fdce; }
+    div.tinyterm.flash code, div.tinyterm.flash form, div.tinyterm.flash textarea {
+      color: #031e11; }
   div.tinyterm::before, div.tinyterm::after {
     content: "";
     position: fixed;
