@@ -4,7 +4,7 @@ Tinyterm
 The tiniest in-browser terminal you've ever seen. Check it out [here](http://rileyjshaw.com/tinyterm).
 
 ## Installation
-tinyterm can be installed using [npm](https://www.npmjs.org/package/tinyterm), [bower](http://bower.io/), or included from [jsdelivr](http://www.jsdelivr.com/#!tinyterm):
+tinyterm can be installed using [npm](https://www.npmjs.org/package/tinyterm), [bower](http://bower.io/), or included from [jsdelivr](http://www.jsdelivr.com/projects/tinyterm):
 ```bash
 npm install tinyterm
 ```
@@ -12,9 +12,9 @@ npm install tinyterm
 bower install tinyterm
 ```
 ```html
-<link rel="stylesheet" href="//cdn.jsdelivr.net/tinyterm/latest/tinyterm.min.css">
+<link rel="stylesheet" href="//cdn.jsdelivr.net/tinyterm/0.0.6/tinyterm.min.css">
 <!-- ... -->
-<script src="//cdn.jsdelivr.net/tinyterm/latest/mainfile"></script>
+<script src="//cdn.jsdelivr.net/tinyterm/0.0.6/mainfile"></script>
 ```
 
 The library uses a [universal module definition](https://github.com/umdjs/umd), so it _should_ work with whatever system you're using.
